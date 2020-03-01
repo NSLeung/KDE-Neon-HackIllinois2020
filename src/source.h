@@ -22,6 +22,7 @@
 #define SOURCE_H
 
 #include "device.h"
+#include "pulse/pulseaudio.h"
 
 namespace QPulseAudio
 {
@@ -37,11 +38,15 @@ public:
     void setMuted(bool muted) override;
     void setActivePortIndex(quint32 port_index) override;
     void setChannelVolume(int channel, qint64 volume) override;
-
+    pa_stream* stream();
+    pa_stream* setStream(pa_stream*);
+    void setSignalPowerLevel(float vol);
     bool isDefault() const override;
     void setDefault(bool enable) override;
-
     void switchStreams() override;
+    static void readCallback(pa_stream *s, size_t length, void *userdata);
+private:
+    pa_stream *m_stream;
 };
 
 } // QPulseAudio

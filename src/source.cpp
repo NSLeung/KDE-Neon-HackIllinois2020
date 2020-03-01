@@ -75,6 +75,43 @@ void Source::setDefault(bool enable)
     }
 }
 
+void Source::setSignalPowerLevel(float vol) {
+//    qWarning() << "VOLUME OF MIC: " << vol;  
+}
+
+void Source::readCallback(pa_stream *s, size_t length, void *userdata) {
+    qWarning() << "Start readCallback";
+    Source * source = static_cast<Source*>(userdata);
+    const void * data;
+    float vol;
+    if (pa_stream_peek(s, &data, &length) < 0) {
+        qWarning() << "Unable to read stream data";
+        return;
+    }
+    //if (!data && length) {
+    //    pa_stream_drop(s);
+    //    return;
+    //}
+
+    vol = ((const float *)data)[length / sizeof(float) - 1];
+
+    //pa_stream_drop(s);
+
+    if (vol < 0) vol = 0;
+    if (vol > 1) vol = 1;
+
+    source->setSignalPowerLevel(vol);
+}
+
+pa_stream* Source::stream() {
+    return m_stream;
+}
+
+pa_stream* Source::setStream(pa_stream* stream) {
+    m_stream = stream;
+    return m_stream;
+}
+
 void Source::switchStreams()
 {
     auto data = context()->sourceOutputs().data();

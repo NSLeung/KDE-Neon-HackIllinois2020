@@ -179,7 +179,6 @@ PlasmaComponents.ListItem {
                         checked: Muted
                         tooltip: i18n("Mute %1", defaultButton.text)
                     }
-
                     PlasmaComponents.Slider {
                         id: slider
 
@@ -260,171 +259,186 @@ PlasmaComponents.ListItem {
                         text: i18nc("only used for sizing, should be widest possible string", "100%")
                     }
                 }
-            }
-        }
+                RowLayout {
+                    PlasmaComponents.Label {
+                           horizontalAlignment: Qt.AlignLeft
+                           Layout.alignment: Qt.AlignHCenter
+                           text: i18n("15dB")
+                       }
+                       Rectangle {
+                           color: theme.highlightColor 
+                           Layout.fillWidth: true
+                           Layout.fillHeight: true
+                           width: 100
+                           radius: height / 2
+                       }
+                        visible: type === "source"
+                   } 
+               }
+           }
 
-        DragAndDrop.DropArea {
-            id: dropArea
-            anchors.fill: parent
-            enabled: draggedStream
+           DragAndDrop.DropArea {
+               id: dropArea
+               anchors.fill: parent
+               enabled: draggedStream
 
-            onDragEnter: {
-                if (draggedStream.deviceIndex == Index) {
-                    event.ignore();
-                }
-            }
+               onDragEnter: {
+                   if (draggedStream.deviceIndex == Index) {
+                       event.ignore();
+                   }
+               }
 
-            onDrop: {
-                draggedStream.deviceIndex = Index;
-            }
-        }
+               onDrop: {
+                   draggedStream.deviceIndex = Index;
+               }
+           }
 
-        MouseArea {
-            anchors {
-                fill: parent
-                leftMargin: clientIcon.width
-            }
-            acceptedButtons: Qt.MiddleButton
-            onClicked: Muted = !Muted
-        }
-    }
+           MouseArea {
+               anchors {
+                   fill: parent
+                   leftMargin: clientIcon.width
+               }
+               acceptedButtons: Qt.MiddleButton
+               onClicked: Muted = !Muted
+           }
+       }
 
-    PlasmaComponents.ContextMenu {
-        id: contextMenu
+       PlasmaComponents.ContextMenu {
+           id: contextMenu
 
-        visualParent: contextMenuButton
-        placement: PlasmaCore.Types.BottomPosedLeftAlignedPopup
+           visualParent: contextMenuButton
+           placement: PlasmaCore.Types.BottomPosedLeftAlignedPopup
 
-        onStatusChanged: {
-            if (status == PlasmaComponents.DialogStatus.Closed) {
-                contextMenuButton.checked = false;
-            }
-        }
+           onStatusChanged: {
+               if (status == PlasmaComponents.DialogStatus.Closed) {
+                   contextMenuButton.checked = false;
+               }
+           }
 
-        function newSeperator() {
-            return Qt.createQmlObject("import org.kde.plasma.components 2.0 as PlasmaComponents; PlasmaComponents.MenuItem { separator: true }", contextMenu);
-        }
-        function newMenuItem() {
-            return Qt.createQmlObject("import org.kde.plasma.components 2.0 as PlasmaComponents; PlasmaComponents.MenuItem {}", contextMenu);
-        }
+           function newSeperator() {
+               return Qt.createQmlObject("import org.kde.plasma.components 2.0 as PlasmaComponents; PlasmaComponents.MenuItem { separator: true }", contextMenu);
+           }
+           function newMenuItem() {
+               return Qt.createQmlObject("import org.kde.plasma.components 2.0 as PlasmaComponents; PlasmaComponents.MenuItem {}", contextMenu);
+           }
 
-        function loadDynamicActions() {
-            contextMenu.clearMenuItems();
+           function loadDynamicActions() {
+               contextMenu.clearMenuItems();
 
-            // Switch all streams of the relevant kind to this device
-            if (type == "source" && sourceView.model.count > 1) {
-                menuItem = newMenuItem();
-                menuItem.text = i18n("Record all audio via this device");
-                menuItem.icon = "mic-on" // or "mic-ready" // or "audio-input-microphone-symbolic"
-                menuItem.clicked.connect(function() {
-                    PulseObject.switchStreams();
-                });
-                contextMenu.addMenuItem(menuItem);
-            } else if (type == "sink" && sinkView.model.count > 1) {
-                menuItem = newMenuItem();
-                menuItem.text = i18n("Play all audio via this device");
-                menuItem.icon = "audio-on" // or "audio-ready" // or "audio-speakers-symbolic"
-                menuItem.clicked.connect(function() {
-                    PulseObject.switchStreams();
-                });
-                contextMenu.addMenuItem(menuItem);
-            }
+               // Switch all streams of the relevant kind to this device
+               if (type == "source" && sourceView.model.count > 1) {
+                   menuItem = newMenuItem();
+                   menuItem.text = i18n("Record all audio via this device");
+                   menuItem.icon = "mic-on" // or "mic-ready" // or "audio-input-microphone-symbolic"
+                   menuItem.clicked.connect(function() {
+                       PulseObject.switchStreams();
+                   });
+                   contextMenu.addMenuItem(menuItem);
+               } else if (type == "sink" && sinkView.model.count > 1) {
+                   menuItem = newMenuItem();
+                   menuItem.text = i18n("Play all audio via this device");
+                   menuItem.icon = "audio-on" // or "audio-ready" // or "audio-speakers-symbolic"
+                   menuItem.clicked.connect(function() {
+                       PulseObject.switchStreams();
+                   });
+                   contextMenu.addMenuItem(menuItem);
+               }
 
-            // Ports
-            // Intentionally only shown when there are at least two ports.
-            if (PulseObject.ports && PulseObject.ports.length > 1) {
-                contextMenu.addMenuItem(newSeperator());
+               // Ports
+               // Intentionally only shown when there are at least two ports.
+               if (PulseObject.ports && PulseObject.ports.length > 1) {
+                   contextMenu.addMenuItem(newSeperator());
 
-                var menuItem = newMenuItem();
-                menuItem.text = i18nc("Heading for a list of ports of a device (for example built-in laptop speakers or a plug for headphones)", "Ports");
-                menuItem.section = true;
-                contextMenu.addMenuItem(menuItem);
+                   var menuItem = newMenuItem();
+                   menuItem.text = i18nc("Heading for a list of ports of a device (for example built-in laptop speakers or a plug for headphones)", "Ports");
+                   menuItem.section = true;
+                   contextMenu.addMenuItem(menuItem);
 
-                var setActivePort = function(portIndex) {
-                    return function() {
-                        PulseObject.activePortIndex = portIndex;
-                    };
-                };
+                   var setActivePort = function(portIndex) {
+                       return function() {
+                           PulseObject.activePortIndex = portIndex;
+                       };
+                   };
 
-                // If an unavailable port is active, show all the ports.
-                if (PulseObject.ports[PulseObject.activePortIndex].availability == Port.Unavailable) {
-                    for (var i = 0; i < PulseObject.ports.length; i++) {
-                        var port = PulseObject.ports[i];
-                        var menuItem = newMenuItem();
-                        if (port.availability == Port.Unavailable) {
-                            if (port.name == "analog-output-speaker" || port.name == "analog-input-microphone-internal") {
-                                menuItem.text = i18nc("Port is unavailable", "%1 (unavailable)", port.description);
-                            } else {
-                                menuItem.text = i18nc("Port is unplugged", "%1 (unplugged)", port.description);
-                            }
-                        } else {
-                            menuItem.text = port.description;
-                        }
-                        menuItem.checkable = true;
-                        menuItem.checked = i === PulseObject.activePortIndex;
-                        menuItem.clicked.connect(setActivePort(i));
-                        contextMenu.addMenuItem(menuItem);
-                    }
-                } else { // Hide ports that are unavailable and only show if there are at least two available
-                    var menuItemsPorts = [];
-                    var availablePorts = 0;
-                    for (var i = 0; i < PulseObject.ports.length; i++) {
-                        var port = PulseObject.ports[i];
-                        if (port.availability != Port.Unavailable) {
-                            menuItemsPorts[availablePorts] = newMenuItem();
-                            menuItemsPorts[availablePorts].text = port.description;
-                            menuItemsPorts[availablePorts].checkable = true;
-                            menuItemsPorts[availablePorts].checked = i === PulseObject.activePortIndex;
-                            menuItemsPorts[availablePorts].clicked.connect(setActivePort(i));
-                            contextMenu.addMenuItem(menuItemsPorts[availablePorts]);
-                            availablePorts++;
-                        }
-                    }
+                   // If an unavailable port is active, show all the ports.
+                   if (PulseObject.ports[PulseObject.activePortIndex].availability == Port.Unavailable) {
+                       for (var i = 0; i < PulseObject.ports.length; i++) {
+                           var port = PulseObject.ports[i];
+                           var menuItem = newMenuItem();
+                           if (port.availability == Port.Unavailable) {
+                               if (port.name == "analog-output-speaker" || port.name == "analog-input-microphone-internal") {
+                                   menuItem.text = i18nc("Port is unavailable", "%1 (unavailable)", port.description);
+                               } else {
+                                   menuItem.text = i18nc("Port is unplugged", "%1 (unplugged)", port.description);
+                               }
+                           } else {
+                               menuItem.text = port.description;
+                           }
+                           menuItem.checkable = true;
+                           menuItem.checked = i === PulseObject.activePortIndex;
+                           menuItem.clicked.connect(setActivePort(i));
+                           contextMenu.addMenuItem(menuItem);
+                       }
+                   } else { // Hide ports that are unavailable and only show if there are at least two available
+                       var menuItemsPorts = [];
+                       var availablePorts = 0;
+                       for (var i = 0; i < PulseObject.ports.length; i++) {
+                           var port = PulseObject.ports[i];
+                           if (port.availability != Port.Unavailable) {
+                               menuItemsPorts[availablePorts] = newMenuItem();
+                               menuItemsPorts[availablePorts].text = port.description;
+                               menuItemsPorts[availablePorts].checkable = true;
+                               menuItemsPorts[availablePorts].checked = i === PulseObject.activePortIndex;
+                               menuItemsPorts[availablePorts].clicked.connect(setActivePort(i));
+                               contextMenu.addMenuItem(menuItemsPorts[availablePorts]);
+                               availablePorts++;
+                           }
+                       }
 
-                    if (availablePorts <= 1){
-                        menuItem.visible = false;
-                        for (var i = 0; i < availablePorts; i++) {
-                            menuItemsPorts[i].visible = false;
-                        }
-                    }
-                }
-            }
+                       if (availablePorts <= 1){
+                           menuItem.visible = false;
+                           for (var i = 0; i < availablePorts; i++) {
+                               menuItemsPorts[i].visible = false;
+                           }
+                       }
+                   }
+               }
 
-            // Choose output / input device
-            // Intentionally only shown when there are at least two options
-            if ((type == "sink-input" && sinkView.model.count > 1) || (type == "source-input" && sourceView.model.count > 1)) {
-                contextMenu.addMenuItem(newSeperator());
-                var menuItem = newMenuItem();
-                if (type == "sink-input") {
-                    menuItem.text = i18nc("Heading for a list of possible output devices (speakers, headphones, ...) to choose", "Play audio using");
-                } else {
-                    menuItem.text = i18nc("Heading for a list of possible input devices (built-in microphone, headset, ...) to choose", "Record audio using");
-                }
-                menuItem.section = true;
-                contextMenu.addMenuItem(menuItem);
-                var sModel = type == "sink-input" ? sinkView.model : sourceView.model;
+               // Choose output / input device
+               // Intentionally only shown when there are at least two options
+               if ((type == "sink-input" && sinkView.model.count > 1) || (type == "source-input" && sourceView.model.count > 1)) {
+                   contextMenu.addMenuItem(newSeperator());
+                   var menuItem = newMenuItem();
+                   if (type == "sink-input") {
+                       menuItem.text = i18nc("Heading for a list of possible output devices (speakers, headphones, ...) to choose", "Play audio using");
+                   } else {
+                       menuItem.text = i18nc("Heading for a list of possible input devices (built-in microphone, headset, ...) to choose", "Record audio using");
+                   }
+                   menuItem.section = true;
+                   contextMenu.addMenuItem(menuItem);
+                   var sModel = type == "sink-input" ? sinkView.model : sourceView.model;
 
-                for (var i = 0; i < sModel.count; ++i) {
-                    var data = sModel.get(i);
-                    var menuItem = newMenuItem();
-                    menuItem.text = data.Description;
-                    menuItem.enabled = true;
-                    menuItem.checkable = true;
-                    menuItem.checked = data.Index === PulseObject.deviceIndex;
-                    var setActiveSink = function(sinkIndex) {
-                        return function() {
-                            PulseObject.deviceIndex = sinkIndex;
-                        };
-                    };
-                    menuItem.clicked.connect(setActiveSink(data.Index));
-                    contextMenu.addMenuItem(menuItem);
-                }
-            }
-        }
+                   for (var i = 0; i < sModel.count; ++i) {
+                       var data = sModel.get(i);
+                       var menuItem = newMenuItem();
+                       menuItem.text = data.Description;
+                       menuItem.enabled = true;
+                       menuItem.checkable = true;
+                       menuItem.checked = data.Index === PulseObject.deviceIndex;
+                       var setActiveSink = function(sinkIndex) {
+                           return function() {
+                               PulseObject.deviceIndex = sinkIndex;
+                           };
+                       };
+                       menuItem.clicked.connect(setActiveSink(data.Index));
+                       contextMenu.addMenuItem(menuItem);
+                   }
+               }
+           }
 
-        function show() {
-            loadDynamicActions();
-            openRelative();
-        }
-    }
-}
+           function show() {
+               loadDynamicActions();
+               openRelative();
+           }
+       }
+   }

@@ -54,7 +54,6 @@ public:
     virtual int count() const = 0;
     virtual QObject *objectAt(int index) const = 0;
     virtual int indexOfObject(QObject *object) const = 0;
-
 Q_SIGNALS:
     void aboutToBeAdded(int index);
     void added(int index);

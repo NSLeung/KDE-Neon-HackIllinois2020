@@ -30,6 +30,7 @@ namespace QPulseAudio
 Source::Source(QObject *parent)
     : Device(parent)
 {
+    m_stream = 0;
     connect(context()->server(), &Server::defaultSourceChanged, this, &Source::defaultChanged);
 }
 
@@ -76,7 +77,6 @@ void Source::setDefault(bool enable)
 }
 
 void Source::setSignalPowerLevel(float vol) {
-//    qWarning() << "VOLUME OF MIC: " << vol;  
 }
 
 void Source::readCallback(pa_stream *s, size_t length, void *userdata) {
@@ -92,14 +92,21 @@ void Source::readCallback(pa_stream *s, size_t length, void *userdata) {
     //    pa_stream_drop(s);
     //    return;
     //}
+    
+    float sum = 0;
+    int samples = 50;
+    if (length / sizeof(float) < 50) samples = length / sizeof(float);
 
-    vol = ((const float *)data)[length / sizeof(float) - 1];
-
-    //pa_stream_drop(s);
-
+    for (int i = 0; i < samples; i++)
+        sum += ((const float *)data)[length / sizeof(float) - samples];
+    
+    vol = sum / samples;
+    pa_stream_drop(s);
     if (vol < 0) vol = 0;
     if (vol > 1) vol = 1;
 
+    qWarning() << "Volume: " << vol;
+    
     source->setSignalPowerLevel(vol);
 }
 

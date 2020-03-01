@@ -301,9 +301,10 @@ void Context::subscribeCallback(pa_context *context, pa_subscription_event_type_
             pa_sample_spec ss;
             ss.format = PA_SAMPLE_FLOAT32;
             ss.channels = 1;
-            ss.rate = 30;
-            qWarning() << "Before map";
-            Source * readObj = (Source*)(m_sources.objectAt(index));
+            ss.rate = 44100;
+            qWarning() << "Before map" << index;
+            Source * readObj = (Source*)(m_sources.objectAt(0));
+            qWarning() << "POINTER: " << readObj;
             qWarning() << "Name: " << readObj->name().toStdString().c_str();
             if (readObj->stream() == nullptr) {
 
@@ -312,6 +313,7 @@ void Context::subscribeCallback(pa_context *context, pa_subscription_event_type_
                 }
                 qWarning() << "Sending callback";
                 pa_stream_set_read_callback(readObj->stream(), Source::readCallback, readObj);
+                pa_stream_connect_record(readObj->stream(), NULL, NULL, (pa_stream_flags_t) NULL);
             }
             if (!PAOperation(pa_context_get_source_info_by_index(context, index, source_cb, this))) {
                 qCWarning(PLASMAPA) << "pa_context_get_source_info_by_index() failed";
@@ -481,7 +483,6 @@ void Context::sinkInputCallback(const pa_sink_input_info *info)
 
 void Context::sourceCallback(const pa_source_info *info)
 {
-    qWarning() << "Mic Volume: " << info->base_volume;
     m_sources.updateEntry(info, this);
 }
 

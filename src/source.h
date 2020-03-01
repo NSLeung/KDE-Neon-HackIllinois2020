@@ -32,7 +32,6 @@ class Source : public Device
     Q_OBJECT
 public:
     explicit Source(QObject *parent);
-
     void update(const pa_source_info *info);
     void setVolume(qint64 volume) override;
     void setMuted(bool muted) override;

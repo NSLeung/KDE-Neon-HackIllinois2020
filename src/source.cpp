@@ -80,7 +80,7 @@ void Source::setDefault(bool enable)
 void Source::setSignalPowerLevel(float vol) {
     if (vol != m_inputVolume) {
         m_inputVolume = (quint32) std::round(vol);
-        qWarning() << "Volume: " << vol;
+        qWarning() << "Volume: " << m_inputVolume;
         Q_EMIT inputVolumeChanged();
     }
 }

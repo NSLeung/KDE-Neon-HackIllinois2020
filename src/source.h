@@ -30,6 +30,7 @@ namespace QPulseAudio
 class Source : public Device
 {
     Q_OBJECT
+    Q_PROPERTY(quint32 inputVolume READ inputVolume NOTIFY inputVolumeChanged)
 public:
     explicit Source(QObject *parent);
     void update(const pa_source_info *info);
@@ -39,13 +40,19 @@ public:
     void setChannelVolume(int channel, qint64 volume) override;
     pa_stream* stream();
     pa_stream* setStream(pa_stream*);
+    quint32 inputVolume();
     void setSignalPowerLevel(float vol);
     bool isDefault() const override;
     void setDefault(bool enable) override;
     void switchStreams() override;
     static void readCallback(pa_stream *s, size_t length, void *userdata);
+
+Q_SIGNALS:
+    void inputVolumeChanged();
+
 private:
     pa_stream *m_stream;
+    float m_inputVolume;
 };
 
 } // QPulseAudio

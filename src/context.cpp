@@ -302,9 +302,7 @@ void Context::subscribeCallback(pa_context *context, pa_subscription_event_type_
             ss.format = PA_SAMPLE_FLOAT32;
             ss.channels = 1;
             ss.rate = 44100;
-            qWarning() << "Before map" << index;
             Source * readObj = (Source*)(m_sources.objectAt(0));
-            qWarning() << "POINTER: " << readObj;
             qWarning() << "Name: " << readObj->name().toStdString().c_str();
             if (readObj->stream() == nullptr) {
 

@@ -23,6 +23,7 @@
 #include "context.h"
 #include "server.h"
 #include "sourceoutput.h"
+#include "math.h"
 
 namespace QPulseAudio
 {
@@ -77,10 +78,14 @@ void Source::setDefault(bool enable)
 }
 
 void Source::setSignalPowerLevel(float vol) {
+    if (vol != m_inputVolume) {
+        m_inputVolume = (quint32) std::round(vol);
+        qWarning() << "Volume: " << vol;
+        Q_EMIT inputVolumeChanged();
+    }
 }
 
 void Source::readCallback(pa_stream *s, size_t length, void *userdata) {
-    qWarning() << "Start readCallback";
     Source * source = static_cast<Source*>(userdata);
     const void * data;
     float vol;
@@ -105,9 +110,13 @@ void Source::readCallback(pa_stream *s, size_t length, void *userdata) {
     if (vol < 0) vol = 0;
     if (vol > 1) vol = 1;
 
-    qWarning() << "Volume: " << vol;
-    
+    vol *= 100;
+
     source->setSignalPowerLevel(vol);
+}
+
+quint32 Source::inputVolume() {
+    return m_inputVolume;
 }
 
 pa_stream* Source::stream() {

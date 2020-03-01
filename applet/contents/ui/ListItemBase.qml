@@ -265,14 +265,14 @@ PlasmaComponents.ListItem {
                            Layout.alignment: Qt.AlignHCenter
                            text: i18n("15dB")
                        }
-                       Rectangle {
-                           color: theme.highlightColor 
+                       PlasmaComponents.ProgressBar {
+                           minimumValue: 0
+                           maximumValue: 100
+                           value: PulseObject.inputVolume
                            Layout.fillWidth: true
                            Layout.fillHeight: true
-                           width: 100
-                           radius: height / 2
                        }
-                        visible: type === "source"
+                       visible: type === "source"
                    } 
                }
            }
